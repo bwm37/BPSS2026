@@ -1,0 +1,1112 @@
+!!ExportedWorkflow
+apiVersion: torq.io/v2alpha
+kind: Workflow
+id: adf9c5ae-b1b1-439a-a7c5-8951ae9be9b6
+name: NK-AI Report
+trigger:
+  onDemandTrigger:
+    parameterList:
+      parameters: []
+playbook:
+  steps:
+    - parallel:
+        uuid: 52de0164-cd3c-4599-9ad0-b50f3cb41396
+        pretty_name: Parallel Executions
+        threads:
+          - uuid: a89464d4-983f-4388-88e5-1de0887f16d1
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/utils/date_and_time_utils/get-date:4.4.1
+                id: get_date_ai_report_end
+                env:
+                  DATE: ""
+                  DATE_FORMAT_LAYOUT: 2006-01-02T15:04:05Z07:00
+                  TIME_AGO: ""
+                uuid: 41e3578e-65b7-42c8-be2c-f2af871c78ad
+                pretty_name: Get Date AI Report End
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_48_0
+                    env: {}
+                    sync: true
+                    disable: false
+                documentationUrl: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+                manifestId: 69776185-df46-50b5-8136-f6d19c46b59b
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/utils/date_and_time_utils/convert-date:2.3.1
+                id: convert_date_end
+                env:
+                  CURRENT_DATE_FORMAT_LAYOUT: 2006-01-02T15:04:05Z07:00
+                  DATE: '{{ $.get_date_ai_report_end.result }}'
+                  NEW_DATE_FORMAT_LAYOUT: "20060102"
+                uuid: 031f5f57-07e7-4182-9ad3-c03e4110a508
+                pretty_name: Convert Date End
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_48_0
+                    env: {}
+                    sync: true
+                    disable: false
+                documentationUrl: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+                manifestId: 45ab5b18-7083-536f-89d3-87fe1ae6d92f
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+          - uuid: 22f86817-1c0a-40fb-891b-06a794504def
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/utils/date_and_time_utils/get-date:4.4.1
+                id: get_date_ai_report_start
+                env:
+                  DATE: ""
+                  DATE_FORMAT_LAYOUT: 2006-01-02T15:04:05Z07:00
+                  TIME_AGO: 7d
+                uuid: 1e30f0bb-6ea7-4732-9962-7be9c697ef92
+                pretty_name: Get Date AI Report Start
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_48_0
+                    env: {}
+                    sync: true
+                    disable: false
+                documentationUrl: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+                manifestId: 69776185-df46-50b5-8136-f6d19c46b59b
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/utils/date_and_time_utils/convert-date:2.3.1
+                id: convert_date_start
+                env:
+                  CURRENT_DATE_FORMAT_LAYOUT: 2006-01-02T15:04:05Z07:00
+                  DATE: '{{ $.get_date_ai_report_start.result }}'
+                  NEW_DATE_FORMAT_LAYOUT: "20060102"
+                uuid: 0d642204-4786-4894-9507-be92ebe4e85f
+                pretty_name: Convert Date Start
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_48_0
+                    env: {}
+                    sync: true
+                    disable: false
+                documentationUrl: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+                manifestId: 45ab5b18-7083-536f-89d3-87fe1ae6d92f
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+    - parallel:
+        uuid: f366c20e-bdff-4712-bbb4-232dad7ff704
+        pretty_name: Parallel Executions
+        threads:
+          - uuid: 93f435f6-9190-4fbf-abd7-bb033af709bc
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/defender_endpoint/create-session:2.2.0
+                id: create_session_for_defender
+                env:
+                  DEFENDER_ENDPOINT_TENANT_ID: [REDACTED]
+                envFrom:
+                  integrationRef: defender_readonly
+                uuid: e1b0d7aa-9f41-40c4-a8ec-200be4e365fb
+                pretty_name: Create Session for Defender
+                options:
+                  executor:
+                    name: http_request_v_4_21_0
+                    env:
+                      BODY: '[{"key": "grant_type", "type": "text", "value": "client_credentials"},
+                        {"key": "client_id", "type": "text", "value": "{{
+                        .DEFENDER_ENDPOINT_CLIENT_ID }}", "should_exists_var":
+                        "DEFENDER_ENDPOINT_CLIENT_ID"}, {"key": "scope", "type":
+                        "text", "value":
+                        "https://securitycenter.onmicrosoft.com/windowsatpservice/.default"},
+                        {"key": "client_secret", "type": "text", "value": "{{
+                        .DEFENDER_ENDPOINT_CLIENT_SECRET }}",
+                        "should_exists_var":
+                        "DEFENDER_ENDPOINT_CLIENT_SECRET"}]'
+                      CONTENT_TYPE: application/x-www-form-urlencoded
+                      HEADERS: '{}'
+                      METHOD: POST
+                      PARSE_HJSON: "true"
+                      REQUIRED_VARIABLES: '["DEFENDER_ENDPOINT_CLIENT_ID",
+                        "DEFENDER_ENDPOINT_CLIENT_SECRET",
+                        "DEFENDER_ENDPOINT_TENANT_ID"]'
+                      TIMEOUT: "120"
+                      URL: https://login.microsoftonline.com/{{ .DEFENDER_ENDPOINT_TENANT_ID | urlEnc
+                        }}/oauth2/v2.0/token
+                    sync: true
+                    disable: false
+                manifestId: 71c1a379-98d6-571a-813d-ad9ca4b9650e
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/defender_endpoint/run-advanced-query:2.1.0
+                id: run_advanced_query_total_visitcount
+                env:
+                  DEFENDER_ACCESS_TOKEN: '{{ $.create_session_for_defender.api_object.access_token }}'
+                  QUERY: "let StartTime = datetime({{ $.get_date_ai_report_start.result }});
+
+                    let EndTime = datetime({{
+                    $.get_date_ai_report_end.result }});
+
+                    let Domains = dynamic([
+
+                    \    \"lovable.dev\",
+
+                    \    \"bolt.new\",
+
+                    \    \"v0.dev\",
+
+                    \    \"base44.com\",
+
+                    \    \"dazl.dev\",
+
+                    \    \"tempo.new\",
+
+                    \    \"emergent.sh\",
+
+                    \    \"app.emergent.sh\",
+
+                    \    \"cursor.com\",
+
+                    \    \"windsurf.com\",
+
+                    \    \"trae.ai\",
+
+                    \    \"kiro.dev\",
+
+                    \    \"rosebud.ai\",
+
+                    \    \"bubble.io\",
+
+                    \    \"webflow.com\",
+
+                    \    \"glideapps.com\",
+
+                    \    \"softr.io\",
+
+                    \    \"flutterflow.io\",
+
+                    \    \"adalo.com\",
+
+                    \    \"draftbit.com\",
+
+                    \    \"weweb.io\",
+
+                    \    \"replit.com\",
+
+                    \    \"replit.app\",
+
+                    \    \"stackblitz.com\",
+
+                    \    \"antigravity.google\",
+
+                    \    \"usegalileo.ai\",
+
+                    \    \"magicpatterns.com\",
+
+                    \    \"uizard.io\",
+
+                    \    \"builder.io\",
+
+                    \    \"locofy.ai\",
+
+                    \    \"animaapp.com\",
+
+                    \    \"relume.io\",
+
+                    \    \"framer.com\",
+
+                    \    \"retool.com\",
+
+                    \    \"appsmith.com\",
+
+                    \    \"tooljet.com\",
+
+                    \    \"budibase.com\",
+
+                    \    \"outsystems.com\",
+
+                    \    \"mendix.com\",
+
+                    \    \"powerapps.microsoft.com\",
+
+                    \    \"wix.com\",
+
+                    \    \"hostinger.com\",
+
+                    \    \"hex.tech\",
+
+                    \    \"streamlit.io\",
+
+                    \    \"gradio.app\",
+
+                    \    \"superblocks.com\",
+
+                    \    \"observablehq.com\"
+
+                    ]);
+
+                    DeviceNetworkEvents
+
+                    | where Timestamp between (StartTime ..
+                    EndTime)
+
+                    | where isnotempty(RemoteUrl)
+
+                    | extend UrlLower = tolower(RemoteUrl)
+
+                    | mv-expand Domain = Domains
+
+                    | extend Domain = tostring(Domain)
+
+                    | where UrlLower contains Domain
+
+                    | summarize\ 
+
+                    \    VisitCount = count(),
+
+                    \    DeviceCount = dcount(DeviceName),
+
+                    \    Devices = make_set(DeviceName, 100)
+
+                    \    by Domain
+
+                    | project Domain, VisitCount,
+                    DeviceCount
+
+                    | order by VisitCount desc"
+                uuid: ba3052ed-7b3e-4be2-b947-5d668d36f35a
+                pretty_name: Run Advanced Query Total VisitCount
+                options:
+                  executor:
+                    name: http_request_v_4_2_4
+                    env:
+                      AUTHORIZATION: Bearer
+                      BODY: |-
+                        {
+                            "Query": "{{ .QUERY | jsonEscape }}"
+                        }
+                      CONTENT_TYPE: application/json
+                      HEADERS: |-
+                        {
+                            "Content-Type": "application/json"
+                        }
+                      METHOD: POST
+                      PARSE_HJSON: "true"
+                      REQUIRED_VARIABLES: '["DEFENDER_ACCESS_TOKEN", "QUERY"]'
+                      TIMEOUT: "120"
+                      TOKEN: '{{ .DEFENDER_ACCESS_TOKEN }}'
+                      URL: https://api.securitycenter.microsoft.com/api/advancedqueries/run
+                    sync: true
+                    disable: false
+                documentationUrl: https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/run-advanced-query-api?view=o365-worldwide#http-request
+                manifestId: f694d4dd-dc24-52a1-908d-c86ea6f2cb53
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/jq/create_csv:3.6.0
+                id: create_csv_file_defender
+                env:
+                  __TQ_FILE_ENV_PARSER__INPUT: plain-text
+                  HEADERS: Domain,DeviceCount,VisitCount
+                  INPUT: '{{ $.run_advanced_query_total_visitcount.api_object.Results }}'
+                uuid: 9b1e390b-189c-48ac-848c-644ec84b5923
+                pretty_name: Create CSV file - Defender
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_42_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 361d0c60-68be-575a-b89a-c67932323419
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+          - uuid: 663eaee7-288e-4f2c-97d3-2523821e4b45
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/crowdstrike/create-session:5.5.0
+                id: create_session_crowdstrike
+                envFrom:
+                  integrationRef: crowdstrike
+                uuid: d55c994f-6018-4927-b7ff-fb0e2337417d
+                pretty_name: Create Session Crowdstrike
+                options:
+                  executor:
+                    name: ""
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 91007392-fa08-56bf-b8de-66151f37e780
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/http/request:4.33.0
+                id: humio_total_visitcount
+                env:
+                  AUTHORIZATION: Bearer
+                  BODY: |-
+                    {
+                      "repo_or_view": "search-all",
+                      "queryString": "DomainName = /(?i)^(lovable\\.dev|bolt\\.new|v0\\.dev|base44\\.com|dazl\\.dev|tempo\\.new|emergent\\.sh|app\\.emergent\\.sh|cursor\\.com|windsurf\\.com|trae\\.ai|kiro\\.dev|rosebud\\.ai|bubble\\.io|webflow\\.com|glideapps\\.com|softr\\.io|flutterflow\\.io|adalo\\.com|draftbit\\.com|weweb\\.io|replit\\.com|replit\\.app|stackblitz\\.com|antigravity\\.google|usegalileo\\.ai|magicpatterns\\.com|uizard\\.io|builder\\.io|locofy\\.ai|animaapp\\.com|relume\\.io|framer\\.com|retool\\.com|appsmith\\.com|tooljet\\.com|budibase\\.com|outsystems\\.com|mendix\\.com|powerapps\\.microsoft\\.com|wix\\.com|hostinger\\.com|hex\\.tech|streamlit\\.io|gradio\\.app|superblocks\\.com|observablehq\\.com)$/ | Domain := DomainName | groupBy([Domain], function=[count(as=VisitCount), count(ComputerName, distinct=true, as=DeviceCount)]) | sort(VisitCount, order=desc) | table([Domain, VisitCount, DeviceCount])",
+                      "start": "7days",
+                      "end": "now"
+                    }
+                  CONTENT_TYPE: application/json; charset=utf-8
+                  HEADERS: ""
+                  METHOD: POST
+                  TOKEN: '{{ $.create_session_crowdstrike.api_object.access_token }}'
+                  URL: https://api.us-2.crowdstrike.com/humio/api/v1/repositories/search-all/queryjobs
+                uuid: f517a90d-d505-4b86-8ccc-0a2ee6d3c053
+                pretty_name: Humio - Total VisitCount
+                options:
+                  executor:
+                    name: http_request_v_4_35_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 7a86e1b9-edf7-5a09-a8be-149d431a01ee
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/http/request:4.33.0
+                id: humio_get_search_result_total_visitcount
+                env:
+                  AUTHORIZATION: Bearer
+                  HEADERS: ""
+                  METHOD: GET
+                  TOKEN: '{{ $.create_session_crowdstrike.api_object.access_token }}'
+                  URL: https://api.us-2.crowdstrike.com/humio/api/v1/repositories/search-all/queryjobs/{{
+                    $.humio_total_visitcount.api_object.id }}
+                uuid: d1c9bd04-add0-4d8e-a4d5-7b3ee6666c7b
+                pretty_name: Humio - Get Search Result - Total VisitCount
+                options:
+                  executor:
+                    name: http_request_v_4_35_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 7a86e1b9-edf7-5a09-a8be-149d431a01ee
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/jq/create_csv:3.6.0
+                id: create_csv_file_crowdstrike
+                env:
+                  __TQ_FILE_ENV_PARSER__INPUT: plain-text
+                  HEADERS: Domain,DeviceCount,VisitCount
+                  INPUT: '{{ $.humio_get_search_result_total_visitcount.api_object.events }}'
+                uuid: 20b8fccd-5914-446c-b368-ee0e864d2387
+                pretty_name: Create CSV file - Crowdstrike
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_42_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 361d0c60-68be-575a-b89a-c67932323419
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+          - uuid: fd1dfa73-f030-4727-af20-e4d75a9a57b9
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/utils/output_utils/print:2.2.0
+                id: print_ai_report_query
+                env:
+                  __TQ_FILE_ENV_PARSER__FILE_OR_STRING: plain-text
+                  FILE_OR_STRING: |-
+                    _index=CATO*
+                    | parse "\"domain_name\":\"*\"" as domain
+                    | parse "\"device_name\":\"*\"" as device
+                    | where (
+                        domain = "lovable.dev"
+                        or domain = "bolt.new"
+                        or domain = "v0.dev"
+                        or domain = "base44.com"
+                        or domain = "dazl.dev"
+                        or domain = "tempo.new"
+                        or domain = "emergent.sh"
+                        or domain = "app.emergent.sh"
+                        or domain = "cursor.com"
+                        or domain = "windsurf.com"
+                        or domain = "trae.ai"
+                        or domain = "kiro.dev"
+                        or domain = "rosebud.ai"
+                        or domain = "bubble.io"
+                        or domain = "webflow.com"
+                        or domain = "glideapps.com"
+                        or domain = "softr.io"
+                        or domain = "flutterflow.io"
+                        or domain = "adalo.com"
+                        or domain = "draftbit.com"
+                        or domain = "weweb.io"
+                        or domain = "replit.com"
+                        or domain = "replit.app"
+                        or domain = "stackblitz.com"
+                        or domain = "antigravity.google"
+                        or domain = "usegalileo.ai"
+                        or domain = "magicpatterns.com"
+                        or domain = "uizard.io"
+                        or domain = "builder.io"
+                        or domain = "locofy.ai"
+                        or domain = "animaapp.com"
+                        or domain = "relume.io"
+                        or domain = "framer.com"
+                        or domain = "retool.com"
+                        or domain = "appsmith.com"
+                        or domain = "tooljet.com"
+                        or domain = "budibase.com"
+                        or domain = "outsystems.com"
+                        or domain = "mendix.com"
+                        or domain = "powerapps.microsoft.com"
+                        or domain = "wix.com"
+                        or domain = "hostinger.com"
+                        or domain = "hex.tech"
+                        or domain = "streamlit.io"
+                        or domain = "gradio.app"
+                        or domain = "superblocks.com"
+                        or domain = "observablehq.com"
+                    )
+                    | where !isEmpty(device)
+                    | where !(device matches /^EAB[- ].*/)
+                    | where device != "EmptyDeviceName"
+                    | count as VisitCount, count_distinct(device) as DeviceCount by domain
+                uuid: 4bca2904-8277-4968-96e5-e155106e9c84
+                pretty_name: Print AI Report Query
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_41_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: e43d76f2-4382-5e23-a993-f15651735991
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: custom-step:5.0.0
+                id: create_search_job_ai_report_total_visitcount
+                env:
+                  QUERY_TIME_RANGE_END: '{{ $.get_date_ai_report_end.result }}'
+                  QUERY_TIME_RANGE_START: '{{ $.get_date_ai_report_start.result }}'
+                  REQUIRERAWMESSAGES: "true"
+                  SEARCH_QUERY: '{{ $.print_ai_report_query.output }}'
+                envFrom:
+                  integrationRef: sumologic
+                uuid: 78b85845-5203-44fc-87bc-e04d0a92f818
+                pretty_name: Create Search Job - AI Report - Total VisitCount
+                options:
+                  executor:
+                    name: http_request_v_4_35_0
+                    env: {}
+                    sync: true
+                    disable: false
+                documentationUrl: https://help.sumologic.com/APIs/Search-Job-API/About-the-Search-Job-API#creating-a-search-job
+                manifestId: 752527bb-bcc1-424a-abe5-e4778a0b0907
+                isPrivate: true
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/sumo_logic/wait-for-search-job-completion:1.2.0
+                id: wait_for_search_job_completion_ai_report_total_visitcount
+                env:
+                  SEARCH_JOB_ID: '{{ $.create_search_job_ai_report_total_visitcount.api_object.id
+                    }}'
+                  SUMO_LOGIC_JOB_COOKIES: '{{
+                    $.create_search_job_ai_report_total_visitcount.cookies }}'
+                envFrom:
+                  integrationRef: sumologic
+                uuid: ad287b58-93d5-43ae-abf7-af813a7c1d36
+                pretty_name: Wait for Search Job Completion AI Report - Total VisitCount
+                options: {}
+                documentationUrl: https://help.sumologic.com/APIs/Search-Job-API/About-the-Search-Job-API#getting-the-current-search-job-status
+                manifestId: 4573b197-39df-53c2-9208-409d64e7ab17
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/sumo_logic/get-search-job-records:4.1.0
+                id: get_search_job_records_ai_report_total_visitcount
+                env:
+                  LIMIT: "5000"
+                  OFFSET: "0"
+                  SEARCH_JOB_ID: '{{ $.create_search_job_ai_report_total_visitcount.api_object.id
+                    }}'
+                  SUMO_LOGIC_JOB_COOKIES: '{{
+                    $.create_search_job_ai_report_total_visitcount.cookies }}'
+                envFrom:
+                  integrationRef: sumologic
+                uuid: 9769c84c-07e3-432f-93a6-46bf255b4058
+                pretty_name: Get Search Job Records AI Report - Total VisitCount
+                options:
+                  executor:
+                    name: http_request_v_4_2_2
+                    env:
+                      AUTHORIZATION: Basic
+                      COOKIES: '{{ .SUMO_LOGIC_JOB_COOKIES }}'
+                      HEADERS: |-
+                        {
+                            "Content-Type": "application/json"
+                        }
+                      METHOD: GET
+                      PARSE_HJSON: "true"
+                      PASSWORD: '{{ .SUMO_LOGIC_ACCESS_KEY }}'
+                      REQUIRED_VARIABLES: '["SUMO_LOGIC_ACCESS_ID", "SUMO_LOGIC_ACCESS_KEY",
+                        "SUMO_LOGIC_DEPLOYMENT_ENDPOINT", "SEARCH_JOB_ID",
+                        "LIMIT", "OFFSET"]'
+                      TIMEOUT: "30"
+                      URL: https://api.{{ .SUMO_LOGIC_DEPLOYMENT_ENDPOINT | urlEnc
+                        }}.com/api/v1/search/jobs/{{ .SEARCH_JOB_ID | urlEnc
+                        }}/records?&limit={{ .LIMIT | urlEnc }}&offset={{
+                        .OFFSET | urlEnc }}
+                      USERNAME: '{{ .SUMO_LOGIC_ACCESS_ID }}'
+                    sync: true
+                    disable: false
+                documentationUrl: https://help.sumologic.com/APIs/Search-Job-API/About-the-Search-Job-API#paging-through-the-records-found-by-a-search-job
+                manifestId: 06997591-94aa-5ce3-b09f-22f0a2c720b4
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/torq_data_transformation/json-transformation-tool:4.1.5
+                id: transform_data
+                env:
+                  INPUT_JSON: '{{
+                    $.get_search_job_records_ai_report_total_visitcount.api_object.records
+                    }}'
+                  TRANSFORMATION_PLAN: '[{"tool":"jq","command":"map(.map | {devicecount, domain,
+                    visitcount})","prompt":"I want the JSON to show
+                    \"devicecount\",\"domain\",\"visitcount\" without
+                    \"map\"","modified":false}]'
+                uuid: cfde772b-f2a8-4bb8-b665-65f771b1128f
+                pretty_name: Transform Data
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_43_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 474ca7d8-2d19-502c-80fc-472768c97bef
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/jq/create_csv:3.6.0
+                id: create_csv_sumo
+                env:
+                  __TQ_FILE_ENV_PARSER__INPUT: plain-text
+                  HEADERS: domain,devicecount,visitcount
+                  INPUT: '{{ $.transform_data.output }}'
+                uuid: 51874cc7-7601-4031-914f-b86afea8f0a7
+                pretty_name: Create CSV - Sumo
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_42_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 361d0c60-68be-575a-b89a-c67932323419
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+    - name: us-docker.pkg.dev/stackpulse/public/torq-ai/ai-operator:3.0.16
+      id: run_task_with_ai_total_visitcount
+      env:
+        LLM_INTEGRATION_ADDITIONAL_ARGS: ""
+        LLM_INTEGRATION_NAME: infosec_openai
+        MODEL: gpt-5-2
+        PROMPT: |-
+          ## CSV
+          1. CSV file 1 = {{ $.create_csv_file_defender.result }}
+          2. CSV file 2 = {{ $.create_csv_file_crowdstrike.result }}
+          3. CSV file 3 = {{ $.create_csv_sumo.result }}
+
+          ## Guidance
+          Combine the given 3 CSVs into a single CSV report.
+
+          Rules:
+          1. Do not add any explanation, summary, title, date range, or extra text.
+          2. Output only one Slack-friendly markdown table.
+          3. Wrap the table inside triple backticks so Slack preserves spacing.
+          4. Use only normal ASCII spaces. Do not use non-breaking spaces or special spacing characters.
+          5. Normalize column names across all CSVs:
+             - Domain, domain, DomainName, domain_name are the same field and must output as Domain.
+             - DeviceCount, ComputerCount, Total DeviceCount are the same field and must output as Total DeviceCount.
+             - VisitCount, Total VisitCount are the same field and must output as Total VisitCount.
+          6. Group by Domain.
+          7. Sum Total DeviceCount across all 3 CSVs for the same Domain.
+          8. Sum Total VisitCount across all 3 CSVs for the same Domain.
+          9. Sort rows by Total VisitCount descending.
+          10. Output exactly these columns in this order:
+             Domain, Total DeviceCount, Total VisitCount.
+          11. Do not skip any rows or domains.
+          12. Do not output the source CSV names.
+
+          Output format:
+          ```markdown
+          | Domain             | Total DeviceCount | Total VisitCount |
+          |--------------------|------------------:|-----------------:|
+          | cursor.com         |               178 |             1439 |
+          | wix.com            |               110 |              288 |
+      uuid: 6727aa39-6841-4f05-8d9a-bcc6b554330e
+      pretty_name: Run Task with AI - Total VisitCount
+      options:
+        executor:
+          name: ""
+          env: {}
+          sync: false
+          disable: false
+      manifestId: 6f126179-9e78-5d0e-944a-878c9d499392
+      isPrivate: false
+      mock_output:
+        enabled: false
+      skip: false
+      retry: {}
+    - name: us-docker.pkg.dev/stackpulse/public/slack/message/message:2.5.0
+      id: send_total_visitcount
+      env:
+        MESSAGE_TEXT: |-
+          *{{ $.convert_date_start.result }}-{{ $.convert_date_end.result }}*
+
+          {{ $.run_task_with_ai_total_visitcount.response }}
+        RECIPIENT: '#C08GA6S7WN7'
+      envFrom:
+        integrationRef: torqbot_slack
+      uuid: 1b8a3922-b346-4f3e-8b76-eea5e05e1aaf
+      pretty_name: Send Total VisitCount
+      options:
+        executor:
+          name: ""
+          env: {}
+          sync: false
+          disable: false
+      manifestId: 2973e8a6-02eb-533a-80e3-1064d1b99c55
+      isPrivate: false
+      mock_output:
+        enabled: false
+      skip: false
+      retry: {}
+    - parallel:
+        uuid: 5fcf959c-85ea-41dd-87cd-87bfaef46f20
+        pretty_name: Parallel Executions
+        threads:
+          - uuid: bc338d9e-b099-448d-836c-45a92d07da6c
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/defender_endpoint/run-advanced-query:2.1.0
+                id: run_advanced_query_get_devices
+                env:
+                  DEFENDER_ACCESS_TOKEN: '{{ $.create_session_for_defender.api_object.access_token }}'
+                  QUERY: |-
+                    let StartTime = datetime({{ $.get_date_ai_report_start.result }});
+                    let EndTime = datetime({{ $.get_date_ai_report_end.result }});
+                    let Domains = dynamic([
+                        "lovable.dev",
+                        "bolt.new",
+                        "v0.dev",
+                        "base44.com",
+                        "dazl.dev",
+                        "tempo.new",
+                        "emergent.sh",
+                        "app.emergent.sh",
+                        "cursor.com",
+                        "windsurf.com",
+                        "trae.ai",
+                        "kiro.dev",
+                        "rosebud.ai",
+                        "bubble.io",
+                        "webflow.com",
+                        "glideapps.com",
+                        "softr.io",
+                        "flutterflow.io",
+                        "adalo.com",
+                        "draftbit.com",
+                        "weweb.io",
+                        "replit.com",
+                        "replit.app",
+                        "stackblitz.com",
+                        "antigravity.google",
+                        "usegalileo.ai",
+                        "magicpatterns.com",
+                        "uizard.io",
+                        "builder.io",
+                        "locofy.ai",
+                        "animaapp.com",
+                        "relume.io",
+                        "framer.com",
+                        "retool.com",
+                        "appsmith.com",
+                        "tooljet.com",
+                        "budibase.com",
+                        "outsystems.com",
+                        "mendix.com",
+                        "powerapps.microsoft.com",
+                        "wix.com",
+                        "hostinger.com",
+                        "hex.tech",
+                        "streamlit.io",
+                        "gradio.app",
+                        "superblocks.com",
+                        "observablehq.com"
+                    ]);
+                    DeviceNetworkEvents
+                    | where Timestamp between (StartTime .. EndTime)
+                    | where isnotempty(RemoteUrl)
+                    | extend UrlLower = tolower(RemoteUrl)
+                    | mv-expand Domain = Domains
+                    | extend Domain = tostring(Domain)
+                    | where UrlLower contains Domain
+                    | where isnotempty(DeviceName)
+                    | summarize VisitCount = count() by Domain, DeviceName
+                    | project Domain, DeviceName, VisitCount
+                    | order by Domain asc, VisitCount desc
+                uuid: 1639caa0-91d3-4276-bf2d-d5884b8067ec
+                pretty_name: Run Advanced Query - Get Devices
+                options:
+                  executor:
+                    name: http_request_v_4_2_4
+                    env:
+                      AUTHORIZATION: Bearer
+                      BODY: |-
+                        {
+                            "Query": "{{ .QUERY | jsonEscape }}"
+                        }
+                      CONTENT_TYPE: application/json
+                      HEADERS: |-
+                        {
+                            "Content-Type": "application/json"
+                        }
+                      METHOD: POST
+                      PARSE_HJSON: "true"
+                      REQUIRED_VARIABLES: '["DEFENDER_ACCESS_TOKEN", "QUERY"]'
+                      TIMEOUT: "120"
+                      TOKEN: '{{ .DEFENDER_ACCESS_TOKEN }}'
+                      URL: https://api.securitycenter.microsoft.com/api/advancedqueries/run
+                    sync: true
+                    disable: false
+                documentationUrl: https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/run-advanced-query-api?view=o365-worldwide#http-request
+                manifestId: f694d4dd-dc24-52a1-908d-c86ea6f2cb53
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+          - uuid: b399ea8a-8cf4-4765-aa7c-52130ba2068a
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/http/request:4.33.0
+                id: humio_get_devices
+                env:
+                  AUTHORIZATION: Bearer
+                  BODY: |-
+                    {
+                      "repo_or_view": "search-all",
+                      "queryString": "DomainName = /(?i)^(lovable\\.dev|bolt\\.new|v0\\.dev|base44\\.com|dazl\\.dev|tempo\\.new|emergent\\.sh|app\\.emergent\\.sh|cursor\\.com|windsurf\\.com|trae\\.ai|kiro\\.dev|rosebud\\.ai|bubble\\.io|webflow\\.com|glideapps\\.com|softr\\.io|flutterflow\\.io|adalo\\.com|draftbit\\.com|weweb\\.io|replit\\.com|replit\\.app|stackblitz\\.com|antigravity\\.google|usegalileo\\.ai|magicpatterns\\.com|uizard\\.io|builder\\.io|locofy\\.ai|animaapp\\.com|relume\\.io|framer\\.com|retool\\.com|appsmith\\.com|tooljet\\.com|budibase\\.com|outsystems\\.com|mendix\\.com|powerapps\\.microsoft\\.com|wix\\.com|hostinger\\.com|hex\\.tech|streamlit\\.io|gradio\\.app|superblocks\\.com|observablehq\\.com)$/ | Domain := DomainName | Computer := ComputerName | Computer != \"\" | groupBy([Domain, Computer], function=count(as=VisitCount)) | sort([Domain, VisitCount], order=[asc, desc]) | table([Domain, Computer, VisitCount])",
+                      "start": 1779464528042,
+                      "end": 1780069328028
+                    }
+                  CONTENT_TYPE: application/json; charset=utf-8
+                  HEADERS: ""
+                  METHOD: POST
+                  TOKEN: '{{ $.create_session_crowdstrike.api_object.access_token }}'
+                  URL: https://api.us-2.crowdstrike.com/humio/api/v1/repositories/search-all/queryjobs
+                uuid: 648a34cd-0eed-4c23-b3a1-aeb43458c362
+                pretty_name: Humio -  Get Devices
+                options:
+                  executor:
+                    name: http_request_v_4_35_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 7a86e1b9-edf7-5a09-a8be-149d431a01ee
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/http/request:4.33.0
+                id: humio_get_search_result_get_devices
+                env:
+                  AUTHORIZATION: Bearer
+                  HEADERS: ""
+                  METHOD: GET
+                  TOKEN: '{{ $.create_session_crowdstrike.api_object.access_token }}'
+                  URL: https://api.us-2.crowdstrike.com/humio/api/v1/repositories/search-all/queryjobs/{{
+                    $.humio_get_devices.api_object.id }}
+                uuid: 909523d1-3cb6-49ab-92f7-8b614fa1f34f
+                pretty_name: Humio - Get Search Result -  Get Devices
+                options:
+                  executor:
+                    name: http_request_v_4_35_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: 7a86e1b9-edf7-5a09-a8be-149d431a01ee
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+          - uuid: d233ab34-5f98-4e62-a815-13145c66c0db
+            steps:
+              - name: us-docker.pkg.dev/stackpulse/public/utils/output_utils/print:2.2.0
+                id: print_ai_report_query_get_devices
+                env:
+                  __TQ_FILE_ENV_PARSER__FILE_OR_STRING: plain-text
+                  FILE_OR_STRING: |-
+                    _index=CATO*
+                    | parse "\"domain_name\":\"*\"" as domain
+                    | parse "\"device_name\":\"*\"" as device
+                    | where (
+                        domain = "lovable.dev"
+                        or domain = "bolt.new"
+                        or domain = "v0.dev"
+                        or domain = "base44.com"
+                        or domain = "dazl.dev"
+                        or domain = "tempo.new"
+                        or domain = "emergent.sh"
+                        or domain = "app.emergent.sh"
+                        or domain = "cursor.com"
+                        or domain = "windsurf.com"
+                        or domain = "trae.ai"
+                        or domain = "kiro.dev"
+                        or domain = "rosebud.ai"
+                        or domain = "bubble.io"
+                        or domain = "webflow.com"
+                        or domain = "glideapps.com"
+                        or domain = "softr.io"
+                        or domain = "flutterflow.io"
+                        or domain = "adalo.com"
+                        or domain = "draftbit.com"
+                        or domain = "weweb.io"
+                        or domain = "replit.com"
+                        or domain = "replit.app"
+                        or domain = "stackblitz.com"
+                        or domain = "antigravity.google"
+                        or domain = "usegalileo.ai"
+                        or domain = "magicpatterns.com"
+                        or domain = "uizard.io"
+                        or domain = "builder.io"
+                        or domain = "locofy.ai"
+                        or domain = "animaapp.com"
+                        or domain = "relume.io"
+                        or domain = "framer.com"
+                        or domain = "retool.com"
+                        or domain = "appsmith.com"
+                        or domain = "tooljet.com"
+                        or domain = "budibase.com"
+                        or domain = "outsystems.com"
+                        or domain = "mendix.com"
+                        or domain = "powerapps.microsoft.com"
+                        or domain = "wix.com"
+                        or domain = "hostinger.com"
+                        or domain = "hex.tech"
+                        or domain = "streamlit.io"
+                        or domain = "gradio.app"
+                        or domain = "superblocks.com"
+                        or domain = "observablehq.com"
+                    )
+                    | where !isEmpty(device)
+                    | where !(device matches /^EAB[- ].*/)
+                    | where device != "EmptyDeviceName"
+                    | count as VisitCount by domain, device
+                    | sort by domain asc, VisitCount desc
+                uuid: 2c7cf20d-a985-4dcf-9467-a8dc3c22c98b
+                pretty_name: Print AI Report Query -  Get Devices
+                options:
+                  executor:
+                    name: utils_infrastructure_v_1_41_0
+                    env: {}
+                    sync: true
+                    disable: false
+                manifestId: e43d76f2-4382-5e23-a993-f15651735991
+                isPrivate: false
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: custom-step:5.0.0
+                id: create_search_job_ai_report_get_devices
+                env:
+                  QUERY_TIME_RANGE_END: '{{ $.get_date_ai_report_end.result }}'
+                  QUERY_TIME_RANGE_START: '{{ $.get_date_ai_report_start.result }}'
+                  REQUIRERAWMESSAGES: "true"
+                  SEARCH_QUERY: '{{ $.print_ai_report_query_get_devices.output }}'
+                envFrom:
+                  integrationRef: sumologic
+                uuid: da89922c-47b3-4504-8e52-6654e58986a0
+                pretty_name: Create Search Job - AI Report - Get Devices
+                options:
+                  executor:
+                    name: http_request_v_4_35_0
+                    env: {}
+                    sync: true
+                    disable: false
+                documentationUrl: https://help.sumologic.com/APIs/Search-Job-API/About-the-Search-Job-API#creating-a-search-job
+                manifestId: 752527bb-bcc1-424a-abe5-e4778a0b0907
+                isPrivate: true
+                isPrivateUrl: true
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/sumo_logic/wait-for-search-job-completion:1.2.0
+                id: wait_for_search_job_completion_ai_report_get_devices
+                env:
+                  SEARCH_JOB_ID: '{{ $.create_search_job_ai_report_get_devices.api_object.id }}'
+                  SUMO_LOGIC_JOB_COOKIES: '{{ $.create_search_job_ai_report_get_devices.cookies }}'
+                envFrom:
+                  integrationRef: sumologic
+                uuid: a3d33a66-3948-45f2-8f12-f4cef6e20147
+                pretty_name: Wait for Search Job Completion AI Report - Get Devices
+                options: {}
+                documentationUrl: https://help.sumologic.com/APIs/Search-Job-API/About-the-Search-Job-API#getting-the-current-search-job-status
+                manifestId: 4573b197-39df-53c2-9208-409d64e7ab17
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+              - name: us-docker.pkg.dev/stackpulse/public/sumo_logic/get-search-job-records:4.1.0
+                id: get_search_job_records_get_devices
+                env:
+                  LIMIT: "5000"
+                  OFFSET: "0"
+                  SEARCH_JOB_ID: '{{ $.create_search_job_ai_report_get_devices.api_object.id }}'
+                  SUMO_LOGIC_JOB_COOKIES: '{{ $.create_search_job_ai_report_get_devices.cookies }}'
+                envFrom:
+                  integrationRef: sumologic
+                uuid: db9657b7-821a-4225-b9c2-53d19435e868
+                pretty_name: Get Search Job Records -  Get Devices
+                options:
+                  executor:
+                    name: http_request_v_4_2_2
+                    env:
+                      AUTHORIZATION: Basic
+                      COOKIES: '{{ .SUMO_LOGIC_JOB_COOKIES }}'
+                      HEADERS: |-
+                        {
+                            "Content-Type": "application/json"
+                        }
+                      METHOD: GET
+                      PARSE_HJSON: "true"
+                      PASSWORD: '{{ .SUMO_LOGIC_ACCESS_KEY }}'
+                      REQUIRED_VARIABLES: '["SUMO_LOGIC_ACCESS_ID", "SUMO_LOGIC_ACCESS_KEY",
+                        "SUMO_LOGIC_DEPLOYMENT_ENDPOINT", "SEARCH_JOB_ID",
+                        "LIMIT", "OFFSET"]'
+                      TIMEOUT: "30"
+                      URL: https://api.{{ .SUMO_LOGIC_DEPLOYMENT_ENDPOINT | urlEnc
+                        }}.com/api/v1/search/jobs/{{ .SEARCH_JOB_ID | urlEnc
+                        }}/records?&limit={{ .LIMIT | urlEnc }}&offset={{
+                        .OFFSET | urlEnc }}
+                      USERNAME: '{{ .SUMO_LOGIC_ACCESS_ID }}'
+                    sync: true
+                    disable: false
+                documentationUrl: https://help.sumologic.com/APIs/Search-Job-API/About-the-Search-Job-API#paging-through-the-records-found-by-a-search-job
+                manifestId: 06997591-94aa-5ce3-b09f-22f0a2c720b4
+                isPrivate: false
+                mock_output:
+                  enabled: false
+                skip: false
+                retry: {}
+    - name: us-docker.pkg.dev/stackpulse/public/torq-ai/ai-operator:3.0.16
+      id: run_task_with_ai_finalized_report
+      env:
+        LLM_INTEGRATION_ADDITIONAL_ARGS: ""
+        LLM_INTEGRATION_NAME: infosec_openai
+        MODEL: gpt-5-2
+        PROMPT: |-
+          ##Data
+          1. Defender: '''{{ $.run_advanced_query_get_devices.api_object.Results }}'''
+          2. Crowdstrike: '''{{ $.humio_get_search_result_get_devices.api_object.events }}'''
+          3. SumoLogics: '''{{ $.get_search_job_records_get_devices.api_object.records }}'''
+
+          ##Guidance.
+          1. DO NOT add any explanation.
+          2. DO NOT skip any data.
+          3. "DeviceNames", "device", "Computers" are the same field in a different name.
+          4. Combine 3 given data into a single data.
+          5. After combining all 3 datasets, normalize the device field into "DeviceName", then group by Domain and DeviceName. Sum VisitCount across all sources for the same Domain and DeviceName. Also calculate the total VisitCount for each Domain across all devices. For each Domain, return the top 5 DeviceName values by DeviceVisitCount. If a Domain has fewer than 5 devices, return all available devices. Output in a human-readable Slack-friendly format, not a markdown table. Use this exact format for each Domain:
+
+          <Domain> - Total Count: <DomainTotalVisitCount>
+          1. <DeviceName> - <DeviceVisitCount>
+          2. <DeviceName> - <DeviceVisitCount>
+          3. <DeviceName> - <DeviceVisitCount>
+          4. <DeviceName> - <DeviceVisitCount>
+          5. <DeviceName> - <DeviceVisitCount>
+
+          Add one blank line between Domains. Do not add explanations, summaries, labels like "Top Devices:", or extra text.
+      uuid: cbc70e5e-22a7-40c0-ad3f-6114475c6fad
+      pretty_name: Run Task with AI - Finalized Report
+      options:
+        executor:
+          name: ""
+          env: {}
+          sync: false
+          disable: false
+      manifestId: 6f126179-9e78-5d0e-944a-878c9d499392
+      isPrivate: false
+      mock_output:
+        enabled: false
+      skip: false
+      retry: {}
+    - name: us-docker.pkg.dev/stackpulse/public/slack/message/snippet:1.9.0
+      id: send_report
+      env:
+        CONTENT: '{{ $.run_task_with_ai_finalized_report.response }}'
+        FILE_TYPE: json
+        RECIPIENT: '#C08GA6S7WN7'
+        THREAD_TS: '{{ $.send_total_visitcount.message_ts }}'
+      envFrom:
+        integrationRef: torqbot_slack
+      uuid: 50f7b46f-8706-4f59-9d4d-11ce67eece07
+      pretty_name: Send Report
+      options:
+        executor:
+          name: ""
+          env: {}
+          sync: false
+          disable: false
+      manifestId: d8cfcbe7-ba7b-5b87-bbaa-2e48849d05a3
+      isPrivate: false
+      mock_output:
+        enabled: false
+      skip: false
+      retry: {}
+  output_schema: '{}'
+root: true
